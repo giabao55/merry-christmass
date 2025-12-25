@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giáng Sinh Đặc Biệt 2025</title>
+    <style>
+        :root {
+            --snow-white: #ffffff;
+            --xmas-red: #d63031;
+            --xmas-green: #27ae60;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--snow-white);
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+        }
+
+        /* Đèn nhấp nháy */
+        .lights {
+            position: fixed; top: 0; width: 100%; height: 15px;
+            background: radial-gradient(circle, #ff0 5px, transparent 5px);
+            background-size: 30px 30px;
+            animation: flash 0.5s infinite alternate;
+            z-index: 1000; display: none;
+        }
+        @keyframes flash { from { opacity: 1; } to { opacity: 0.3; } }
+
+        /* Cây thông khởi đầu */
+        #start-screen {
+            text-align: center; cursor: pointer; z-index: 2000;
+        }
+        #big-tree {
+            font-size: 200px; transition: transform 0.5s;
+            animation: sway 2s infinite ease-in-out;
+        }
+        @keyframes sway { 
+            0%, 100% { transform: rotate(-5deg); } 
+            50% { transform: rotate(5deg); } 
+        }
+
+        /* Khung câu hỏi */
+        #quiz-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 500px; width: 90%;
+            text-align: center; z-index: 100;
+            border: 6px double var(--xmas-red);
+        }
+
+        .question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #2d3436; }
+        .options-grid { display: grid; gap: 10px; }
+        .option {
+            padding: 12px; border: 2px solid var(--xmas-green);
+            background: white; border-radius: 8px; cursor: pointer;
+            font-size: 1rem; transition: 0.2s;
+        }
+        .option:hover { background: var(--xmas-green); color: white; }
+
+        /* Hiệu ứng tuyết và kẹo */
+        .snowflake, .candy {
+            position: fixed; top: -10%; z-index: 1;
+            animation: fall linear infinite; pointer-events: none;
+        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        /* Trang trí */
+        .decor { position: fixed; bottom: 0; font-size: 100px; z-index: 5; display: none; }
+        #santa { left: 20px; }
+        #snowman { right: 20px; }
+        #message { color: var(--xmas-red); font-weight: bold; margin-top: 15px; height: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="lights" id="lights"></div>
+
+<!-- Màn hình bắt đầu -->
+<div id="start-screen" onclick="startQuiz()">
+    <div id="big-tree">🎄</div>
+    <h1 style="color: var(--xmas-green);">Bấm vào Cây Thông để Bắt Đầu!</h1>
+</div>
+
+<!-- Nội dung trắc nghiệm -->
+<div id="quiz-container">
+    <div style="font-size: 50px;">🎄</div>
+    <div id="q-text" class="question"></div>
+    <div id="options" class="options-grid"></div>
+    <div id="message"></div>
+</div>
+
+<div id="santa" class="decor">🎅</div>
+<div id="snowman" class="decor">☃️</div>
+
+<audio id="bg-music" src="isyou.mp3" loop></audio>
+
+<script>
+    const questions = [
+        { q: "Loại thịt nào là phổ biến nhất trong dịp Giáng Sinh?", a: ["Gà tây", "Bò bít tết", "Lợn hun khói", "Gà nướng"], c: 0 },
+        { q: "Ông già Noel vào nhà bằng cách nào?", a: ["Bấm chuông", "Cửa sổ", "Chui qua ống khói", "Gửi bưu điện"], c: 2 },
+        { q: "Bộ phim nào liên quan đến Giáng Sinh?", a: ["Home alone", "Avatar", "Despicable me", "Zootopia"], c: 0 },
+        { q: "Túi đựng quà cho trẻ em là gì?", a: ["Túi HDPE", "Chiếc tất", "Hộp giấy", "Chiếc mũ len"], c: 1 },
+        { q: "Ông già Noel tên thật là gì?", a: ["Jack Frost", "Easter Bunny", "Santa Claus", "Uncle Sam"], c: 2 },
+        { q: "Góc nội tiếp chắn nửa đường tròn có số đo là?", a: ["90°", "45°", "180°", "60°"], c: 0 },
+        { q: "Khẳng định nào SAI về góc nội tiếp?", a: ["Hai cạnh chứa dây cung", "Đỉnh trên đường tròn", "Luôn bằng 90 độ", "Bằng nửa cung bị chắn"], c: 2 },
+        { q: "Nếu Delta < 0 phương trình bậc hai sẽ?", a: ["Vô số nghiệm", "Hai nghiệm", "Vô nghiệm", "Nghiệm kép"], c: 2 },
+        { q: "Ai là tác giả 'Chuyện người con gái Nam Xương'?", a: ["Nguyễn Trãi", "Nguyễn Dữ", "Nguyễn Du", "Đoàn Thị Điểm"], c: 1 },
+        { q: "Hai gia tộc trong 'Romeo và Juliet' có mối thù là?", a: ["Montague và Capulet", "Stark & Lannister", "Medici & Borgia", "Hamlet & Ophelia"], c: 0 },
+        { q: "Bài thơ nào KHÔNG có trong Ngữ văn 9 Tập 1 (KNTT)?", a: ["Thằng quỷ nhỏ", "Nỗi oán sầu...", "Tự tình 2", "Ngày xưa"], c: 0 },
+        { q: "Chất nào sau đây là Alkene?", a: ["CH3-CH2=CH2", "CH2=CH=CH2", "CH3-CH=CH-CH3", "CH=CH3-CH3"], c: 2 },
+        { q: "Công thức chung của Carbohydrate?", a: ["Cn(HO)m", "Cn(HOHO)m", "Cn(H2O2)m", "Cn(H2O)m"], c: 3 },
+        { q: "Ứng dụng nào KHÔNG phải của ethylic alcohol?", a: ["Nhiên liệu", "Sát khuẩn", "Không có đáp án đúng", "Đồ uống"], c: 2 },
+        { q: "F là kí hiệu của gì trong Sinh Học?", a: ["Thế hệ con", "Cặp bố mẹ", "Giao tử", "Phép lai"], c: 0 },
+        { q: "Nguyên tử cấu tạo nên Nucleic acid?", a: ["C P N O H", "C O H N K", "N H G O C", "B A O D Z"], c: 0 },
+        { q: "Loài động vật nào có bộ NST 2n=46?", a: ["Người", "Tinh tinh", "Gà", "Ruồi giấm"], c: 0 },
+        { q: "Điền từ: They ________ this movie three times already.", a: ["have seen", "saw", "have see", "has seen"], c: 0 },
+        { q: "The company's profits have ________ steadily...", a: ["risen", "increased", "lifted", "raised"], c: 0 },
+        { q: "Nhúng thấu kính lồi vào chất lỏng có chiết suất lớn hơn thủy tinh?", a: ["Hội tụ", "Phân kỳ", "Tấm thủy tinh", "Gương cầu lồi"], c: 1 }
+    ];
+
+    let currentQ = 0;
+    const audio = document.getElementById('bg-music');
+
+    function startQuiz() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'block';
+        document.getElementById('lights').style.display = 'block';
+        document.getElementById('santa').style.display = 'block';
+        document.getElementById('snowman').style.display = 'block';
+        audio.play();
+        setInterval(createSnow, 150);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if(currentQ >= questions.length) {
+            document.getElementById('quiz-container').innerHTML = `
+                <h2 style="color:var(--xmas-green)">Chúc mừng bạn đã thành công xuất sắc vượt qua 20 câu hỏi!</h2>
+                <p>(mình đoán là bạn cũng đã tra ChatGPT,.. hoặc là đã làm lại vài lần rồi nhưng thôi kệ đi)</p>
+                <h3>Giáng Sinh an lành MERRY CHRISTMASSSS !!! ❄️🎁</h3>
+            `;
+            setInterval(createCandy, 200);
+            return;
+        }
+        
+        const qData = questions[currentQ];
+        document.getElementById('q-text').innerText = `Câu ${currentQ + 1}: ${qData.q}`;
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        qData.a.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+            btn.innerText = opt;
+            btn.onclick = () => {
+                if(index === qData.c) {
+                    currentQ++;
+                    document.getElementById('message').innerText = "";
+                    loadQuestion();
+                } else {
+                    document.getElementById('message').innerText = "99% con bạc sẽ bỏ cuộc trước khi thắng lớn!";
+                    currentQ = 0;
+                    setTimeout(loadQuestion, 2000);
+                }
+            };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function createSnow() {
+        const snow = document.createElement('div');
+        snow.innerHTML = '❄';
+        snow.className = 'snowflake';
+        snow.style.left = Math.random() * 100 + 'vw';
+        snow.style.fontSize = Math.random() * 20 + 10 + 'px';
+        snow.style.animationDuration = Math.random() * 3 + 2 + 's';
+        snow.style.color = "white";
+        document.body.appendChild(snow);
+        setTimeout(() => snow.remove(), 4000);
+    }
+
+    function createCandy() {
+        const candy = document.createElement('div');
+        candy.innerHTML = ['🍬','🍭','🎁','🍫'][Math.floor(Math.random()*4)];
+        candy.className = 'candy';
+        candy.style.left = Math.random() * 100 + 'vw';
+        candy.style.fontSize = '30px';
+        candy.style.animationDuration = '2.5s';
+        document.body.appendChild(candy);
+        setTimeout(() => candy.remove(), 2500);
+    }
+</script>
+
+</body>
+</html>
